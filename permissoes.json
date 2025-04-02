@@ -2,9 +2,16 @@
     "helen lauren": {
         "ler": [],
         "escrever": [],
-        "apagar": ["main.py"]
+        "apagar": [
+            "main.py"
+        ]
     },
     "maria": {
+        "ler": [],
+        "escrever": [],
+        "apagar": []
+    },
+    "joao": {
         "ler": [],
         "escrever": [],
         "apagar": []

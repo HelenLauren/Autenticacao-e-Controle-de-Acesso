@@ -2,6 +2,7 @@
 #Helen Lauren Bonato. BSI 3°período 
 
 import json
+import getpass #sugestao do prof para esconder infos no terminal
 
 #carrega dados de um arquivo JSON
 def carregar_dados(nome_arquivo):
@@ -52,43 +53,72 @@ usuario_autenticado = None
 tentativas = 0  #conta as tentaivas
 
 while tentativas < 5: #enquanto as tentativas forem menor que 5, ele continua o loop (pq comeca com 0).
-    opcao = input("MENU:\n1 - Cadastrar\n2 - Entrar\nEscolha: ")
-    
-    if opcao not in ['1', '2']:
+    print("\n" + "="*40)
+    print(" 🔐LOGIN OU CADASTRO".center(40))
+    opcao = input("\n1 - Cadastrar\n2 - Entrar\n3- Sair\nEscolha: ")
+    print("\n" + "="*40)
+    if opcao not in ['1', '2', '3']:
         print("Opção inválida!")
         continue
-    
-    nome = input("Nome: ")
-    senha = input("Senha: ")
+
+    if opcao == '3': 
+        print("Saindo do sistema...")
+        break  #encerra pq a pessoa escolheu sair do programa
+    nome = input("\n👤 Nome: ")
+
+    senha = getpass.getpass("\033[1;32m🔑 Senha:\033[m ") 
+    print("\n" + "="*40)
     usuario = Usuario(nome, senha) #passa as info para o arquivo
     
     if opcao == '1':
         if usuario.cadastrar(): #cadastro de usuario
-            print("Cadastro realizado com sucesso!")
+            print("✅ Cadastro realizado com sucesso!")
         continue
     
     if usuario.autenticar():
-        print(f"Bem-vindo, {nome}.")
+        print(f"Bem-vindo, {nome}. Usuário autenticado!")
         usuario_autenticado = nome  #guarda o nome do usuario auteticado
         break  #sai do loop do menu de login e vai para o menu de permissoes
     else:
         tentativas += 1
-        print(f"Usuário ou senha inválidos. Tentativas restantes: {5 - tentativas}")
+        print(f"❌ Usuário ou senha inválidos. Tentativas restantes: {5 - tentativas}")
 
 if tentativas >= 5:
-    print("Acesso bloqueado. Muitas tentativas incorretas.")
+    print("🚫 Acesso bloqueado. Muitas tentativas incorretas 🚫")
     exit()  #encerra o programa apos passar as 5 tentativas incorretas
 
 #menu de permissao
 while True:
+    print("\n" + "="*40)
+    print("📂  MENU DE PERMISSÕES  📂".center(40))
     print("\nOPÇÕES:")
-    opcao = input("1 - Ler\n2 - Escrever\n3 - Apagar\n0 - Sair\nEscolha: ")
-    
+    opcao = input("1 - Ler\n2 - Escrever\n3 - Apagar\n4 - Executar\n5 - Consultar arquivos disponíveis permitidos\n0 - Sair\nEscolha: ")
+    print("\n" + "="*40)
+
     if opcao == '0': 
         print("Saindo do sistema...")
         break  #encerra pq a pessoa escolheu sair do programa
-    
-    tipo_acao = {"1": "ler", "2": "escrever", "3": "apagar"}.get(opcao)
+
+    if opcao == '5': 
+        permissoes_usuario = dados_permissoes[usuario_autenticado]
+        arquivos_com_permissoes = {} #criado um dicionario para armazenar
+
+        for acao, arquivos in permissoes_usuario.items(): #preenche o dicionario com as infos
+            for arquivo in arquivos:
+                if arquivo not in arquivos_com_permissoes:
+                    arquivos_com_permissoes[arquivo] = []
+                    arquivos_com_permissoes[arquivo].append(acao)
+
+        if arquivos_com_permissoes: #exibe os arquivos e tb a acao q a pessoa pode fazer
+            print("\nArquivos disponíveis e permissões:")
+            for arquivo, acoes in arquivos_com_permissoes.items():
+                print(f"  📂 {arquivo}: {', '.join(acoes)}")
+        else:
+            print("\nNenhum arquivo disponível.")
+
+        continue
+
+    tipo_acao = {"1": "ler", "2": "escrever", "3": "apagar", "4": "executar"}.get(opcao)
     if not tipo_acao:
         print("Opção inválida!")
         continue
@@ -97,5 +127,7 @@ while True:
     
     if arquivo in dados_permissoes[usuario_autenticado][tipo_acao]:
         print("Acesso permitido") #se tiver acesso vai permitir ele
+        if opcao == '4': #simulando execucao de arquivo caso a pessoa escolha a opcao 4
+            print(f"Executando o arquivo {arquivo}...")
     else:
         print("Acesso negado") #se n tiver ele nega
