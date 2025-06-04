@@ -1,10 +1,10 @@
-# Avaliação formativa 01, Segurança da Informação
+# Avaliação formativa 01, Segurança da Informação 2.0
 # Helen Lauren Bonato. BSI 3°período 
-
+import hashlib
 import json
 import getpass
 
-# carrega dados de um arquivo JSON
+#carrega dados de um arquivo JSON
 def carregar_dados(nome_arquivo):
     try:
         with open(nome_arquivo, 'r', encoding='utf-8') as arquivo:
@@ -12,20 +12,22 @@ def carregar_dados(nome_arquivo):
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
-# salva os dados no arquivo JSON
+#salva os dados no arquivo JSON
 def salvar_dados(nome_arquivo, dados):
     with open(nome_arquivo, 'w', encoding='utf-8') as arquivo:
         json.dump(dados, arquivo, indent=4)
 
-# arquivos usados
+#arquivos usados
 ARQUIVO_USUARIOS = 'usuarios.json'
 ARQUIVO_PERMISSOES = 'permissoes.json'
 
-# carrega os dados
+#carrega os dados
 dados_usuarios = carregar_dados(ARQUIVO_USUARIOS)
 dados_permissoes = carregar_dados(ARQUIVO_PERMISSOES)
 
-# classe de usuário
+def hash_senha(senha):
+    return hashlib.sha256(senha.encode()).hexdigest()
+    
 class Usuario:
     def __init__(self, nome, senha):
         self.nome = nome
@@ -40,8 +42,8 @@ class Usuario:
         if usuario.get('bloqueado', False):
             return False, "🚫 Conta bloqueada permanentemente por excesso de tentativas."
 
-        if usuario['senha'] == self.senha:
-            usuario['tentativas'] = 0  # zera as tentativas no login bem-sucedido
+        if usuario['senha'] == hash_senha(self.senha):
+            usuario['tentativas'] = 0  #zera as tentativas no login bem-sucedido
             salvar_dados(ARQUIVO_USUARIOS, dados_usuarios)
             return True, "✅ Autenticado com sucesso!"
         else:
@@ -57,13 +59,16 @@ class Usuario:
             return False, f"❌ Senha incorreta. Tentativas restantes: {tentativas_restantes}"
 
     def cadastrar(self):
+        if len(self.nome) != 4 or len(self.senha) != 4:
+            print("❗ Nome e senha devem ter exatamente 4 caracteres.")
+            return False
+
         if self.nome in dados_usuarios:
             print("Usuário já existe!")
             return False
 
-        # novo formato com tentativas e bloqueio
         dados_usuarios[self.nome] = {
-            'senha': self.senha,
+            'senha': hash_senha(self.senha),
             'tentativas': 0,
             'bloqueado': False
         }
