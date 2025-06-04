@@ -77,6 +77,7 @@ class Usuario:
 
         salvar_dados(ARQUIVO_USUARIOS, dados_usuarios)
         salvar_dados(ARQUIVO_PERMISSOES, dados_permissoes)
+        print("✅ Cadastro realizado com sucesso!")
         return True
 
 # menu de login ou cadastro
